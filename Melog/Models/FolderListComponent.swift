@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct FolderComponent: ListViewComponent {
+struct FolderListComponent: ListViewComponent {
     let name: String
     let icon: Image
     let count: Int

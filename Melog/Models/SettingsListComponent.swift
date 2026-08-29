@@ -1,11 +1,11 @@
 //
-//  SettingsComponent.swift
+//  SettingsListComponent.swift
 //  Melog
 //
 
 import SwiftUI
 
-struct SettingsComponent: ListViewComponent {
+struct SettingsListComponent: ListViewComponent {
     let name: String
     let subtitle: String?
     let icon: Image
@@ -47,29 +47,11 @@ struct SettingsComponent: ListViewComponent {
                 }
 
                 Spacer(minLength: 8)
-
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.secondaryText)
             }
         )
     }
 
     func link() -> AnyView {
         destination
-    }
-}
-
-struct SettingsPlaceholderView: View {
-    let title: String
-
-    var body: some View {
-        ContentUnavailableView(
-            "준비 중",
-            systemImage: "hammer.fill",
-            description: Text("\(title) 기능을 준비하고 있습니다.")
-        )
-        .navigationTitle(title)
-        .navigationBarTitleDisplayMode(.inline)
     }
 }

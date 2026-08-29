@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @State var isFolderAlertPresented = false
-    @State var myFolderList: [FolderComponent] = []
+    @State var myFolderList: [FolderListComponent] = []
     @State private var newFolderName: String = ""
     
     var body: some View {
@@ -82,9 +82,9 @@ struct HomeView: View {
             return
         }
 
-        myFolderList.append(FolderComponent(
+        myFolderList.append(FolderListComponent(
             name: trimmedName,
-            icon: Image(systemName: "waveform"),
+            icon: Image(systemName: "folder"),
             count: 0
         ))
         newFolderName = ""
@@ -95,16 +95,16 @@ enum BasicFolders {
     case allMelodies
     case favorites
     
-    var component: FolderComponent {
+    var component: FolderListComponent {
         switch self {
         case .allMelodies:
-            FolderComponent(
+            FolderListComponent(
                 name: "모든 멜로디",
                 icon: Image(systemName: "waveform"),
                 count: 0
             )
         case .favorites:
-            FolderComponent(
+            FolderListComponent(
                 name: "즐겨찾기",
                 icon: Image(systemName: "star"),
                 count: 0
@@ -115,7 +115,7 @@ enum BasicFolders {
 
 private struct Content: View {
     @Binding var isFolderAlertPresented: Bool
-    let myFolderList: [FolderComponent]
+    let myFolderList: [FolderListComponent]
     
     var body: some View {
         HStack {

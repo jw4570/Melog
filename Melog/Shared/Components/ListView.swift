@@ -23,7 +23,7 @@ struct ListView: View {
     let list: [any ListViewComponent]
     
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 14) {
             ForEach(
                 Array(list.enumerated()),
                 id: \.offset
@@ -44,7 +44,7 @@ struct ListView: View {
                     }
                     
                     Divider()
-                        .overlay(Color.primaryText)
+                        .overlay(Color.secondaryText)
                         .padding(.top, 12)
                         .opacity(
                             index == list.count - 1

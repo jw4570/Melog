@@ -10,22 +10,9 @@
 		04FE75A83041B62D00A115AA /* Melog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Melog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		04FE77A530423C2400A115AA /* Exceptions for "Melog" folder in "Melog" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				"/Localized: Resources/Info.plist",
-			);
-			target = 04FE75A73041B62D00A115AA /* Melog */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		04FE75AA3041B62D00A115AA /* Melog */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				04FE77A530423C2400A115AA /* Exceptions for "Melog" folder in "Melog" target */,
-			);
 			path = Melog;
 			sourceTree = "<group>";
 		};

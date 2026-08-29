@@ -71,17 +71,15 @@ struct SettingsView: View {
 
     private var permissionComponents: [any ListViewComponent] {
         [
-            SettingsComponent(
+            SettingsListComponent(
                 name: "마이크 접근 권한",
-                subtitle: "녹음과 실시간 음정 분석에 사용",
                 systemImage: "microphone.fill",
                 iconColor: .blue
             ) {
                 SettingsPlaceholderView(title: "마이크 접근 권한")
             },
-            SettingsComponent(
+            SettingsListComponent(
                 name: "알림 설정",
-                subtitle: "분석 완료 및 주요 소식 알림",
                 systemImage: "bell.fill",
                 iconColor: .orange
             ) {
@@ -92,17 +90,16 @@ struct SettingsView: View {
 
     private var dataComponents: [any ListViewComponent] {
         [
-            SettingsComponent(
+            SettingsListComponent(
                 name: "저장 공간 관리",
-                subtitle: "녹음 파일과 분석 데이터 관리",
                 systemImage: "internaldrive.fill",
                 iconColor: .indigo
             ) {
                 SettingsPlaceholderView(title: "저장 공간 관리")
             },
-            SettingsComponent(
+            SettingsListComponent(
                 name: "모든 녹음 삭제",
-                subtitle: "기기에 저장된 녹음과 분석 결과 삭제",
+                subtitle: "이 항목은 되돌릴 수 없습니다.",
                 systemImage: "trash.fill",
                 iconColor: .red,
                 isDestructive: true
@@ -114,21 +111,21 @@ struct SettingsView: View {
 
     private var privacyComponents: [any ListViewComponent] {
         [
-            SettingsComponent(
+            SettingsListComponent(
                 name: "개인정보 처리방침",
                 systemImage: "hand.raised.fill",
                 iconColor: .teal
             ) {
                 PrivacyPolicyView()
             },
-            SettingsComponent(
+            SettingsListComponent(
                 name: "서비스 이용약관",
                 systemImage: "doc.text.fill",
                 iconColor: .gray
             ) {
                 TermsOfServiceView()
             },
-            SettingsComponent(
+            SettingsListComponent(
                 name: "오픈 소스 라이선스",
                 systemImage: "chevron.left.forwardslash.chevron.right",
                 iconColor: .purple
@@ -140,21 +137,21 @@ struct SettingsView: View {
 
     private var supportComponents: [any ListViewComponent] {
         [
-            SettingsComponent(
+            SettingsListComponent(
                 name: "도움말",
                 systemImage: "questionmark.circle.fill",
                 iconColor: .blue
             ) {
                 SettingsPlaceholderView(title: "도움말")
             },
-            SettingsComponent(
+            SettingsListComponent(
                 name: "의견 보내기",
                 systemImage: "envelope.fill",
                 iconColor: .mint
             ) {
                 SettingsPlaceholderView(title: "의견 보내기")
             },
-            SettingsComponent(
+            SettingsListComponent(
                 name: "문제 신고",
                 systemImage: "exclamationmark.bubble.fill",
                 iconColor: .orange
@@ -166,14 +163,7 @@ struct SettingsView: View {
 
     private var appComponents: [any ListViewComponent] {
         [
-            SettingsComponent(
-                name: "새로운 기능",
-                systemImage: "sparkles",
-                iconColor: .pink
-            ) {
-                SettingsPlaceholderView(title: "새로운 기능")
-            },
-            SettingsComponent(
+            SettingsListComponent(
                 name: "버전",
                 subtitle: appVersion,
                 systemImage: "info.circle.fill",
@@ -188,6 +178,20 @@ struct SettingsView: View {
         Bundle.main.object(
             forInfoDictionaryKey: "CFBundleShortVersionString"
         ) as? String ?? "1.0"
+    }
+}
+
+struct SettingsPlaceholderView: View {
+    let title: String
+
+    var body: some View {
+        ContentUnavailableView(
+            "준비 중",
+            systemImage: "hammer.fill",
+            description: Text("\(title) 기능을 준비하고 있습니다.")
+        )
+        .navigationTitle(title)
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
