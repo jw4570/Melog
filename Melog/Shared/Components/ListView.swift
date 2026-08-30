@@ -11,6 +11,7 @@ protocol ListViewComponent {
     var name: String { get }
     var icon: Image { get }
     var iconColor: Color { get }
+
     func messageView() -> AnyView
     func link() -> AnyView
 }
@@ -19,9 +20,25 @@ extension ListViewComponent {
     var iconColor: Color { .blue }
 }
 
+private struct SheetSelection: Identifiable {
+    let id = UUID()
+    let component: any ListViewComponent
+}
+
 struct ListView: View {
     let list: [any ListViewComponent]
-    
+    let isSheet: Bool
+
+    @State private var selectedItem: SheetSelection?
+
+    init(
+        list: [any ListViewComponent],
+        isSheet: Bool = false
+    ) {
+        self.list = list
+        self.isSheet = isSheet
+    }
+
     var body: some View {
         VStack(spacing: 14) {
             ForEach(
@@ -29,20 +46,21 @@ struct ListView: View {
                 id: \.offset
             ) { index, component in
                 VStack(spacing: 0) {
-                    NavigationLink {
-                        component.link()
-                    } label: {
-                        HStack(spacing: 10) {
-                            component.icon
-                                .font(.system(size: 20))
-                                .foregroundStyle(component.iconColor)
-                                .frame(width: 60)
-                            
-                            component.messageView()
+                    if isSheet {
+                        row(component)
+                            .onTapGesture {
+                                selectedItem = SheetSelection(
+                                    component: component
+                                )
+                            }
+                    } else {
+                        NavigationLink {
+                            component.link()
+                        } label: {
+                            row(component)
                         }
-                        .contentShape(Rectangle())
                     }
-                    
+
                     Divider()
                         .overlay(Color.secondaryText)
                         .padding(.top, 12)
@@ -52,7 +70,6 @@ struct ListView: View {
                                 : 1
                         )
                         .padding(.leading, 64)
-                        
                 }
             }
         }
@@ -63,5 +80,33 @@ struct ListView: View {
             RoundedRectangle(cornerRadius: 20)
                 .fill(.cardBackground)
         }
+        .sheet(item: $selectedItem) { item in
+            NavigationStack {
+                item.component.link()
+                    .toolbar {
+                        ToolbarItem(
+                            placement: .confirmationAction
+                        ) {
+                            Button("완료") {
+                                selectedItem = nil
+                            }
+                        }
+                    }
+            }
+        }
+    }
+
+    private func row(
+        _ component: any ListViewComponent
+    ) -> some View {
+        HStack(spacing: 10) {
+            component.icon
+                .font(.system(size: 20))
+                .foregroundStyle(component.iconColor)
+                .frame(width: 60)
+
+            component.messageView()
+        }
+        .contentShape(Rectangle())
     }
 }
