@@ -18,6 +18,11 @@ final class RecordingViewModel {
     private(set) var isRecording = false
     private(set) var elapsedTime: TimeInterval = 0
     private(set) var samples: [CGFloat] = []
+    private(set) var detectedPitch: DetectedPitch?
+    private(set) var processedPitch: DetectedPitch?
+    private(set) var pitchHeightSamples: [CGFloat] = []
+    private(set) var processedPitchSamples: [CGFloat] = []
+    private(set) var savedRecord: RecordingRecord?
 
     var errorMessage: String?
 
@@ -32,23 +37,33 @@ final class RecordingViewModel {
     }
 
     func toggleRecording(
-        modelContext: ModelContext
+        modelContext: ModelContext,
+        folder: RecordingFolder?
     ) async {
         if isRecording {
             stopRecording(
-                modelContext: modelContext
+                modelContext: modelContext,
+                folder: folder
             )
         } else {
-            await startRecording()
+            await startRecording(
+                in: folder?.relativePath
+            )
         }
     }
 
-    private func startRecording() async {
+    private func startRecording(
+        in relativeDirectory: String?
+    ) async {
         do {
             try await recordingService
-                .startRecording()
+                .startRecording(
+                    in: relativeDirectory
+                )
 
             isRecording = true
+            pitchHeightSamples = []
+            processedPitchSamples = []
             observeRecordingState()
         } catch {
             errorMessage =
@@ -57,31 +72,43 @@ final class RecordingViewModel {
     }
 
     private func stopRecording(
-        modelContext: ModelContext
+        modelContext: ModelContext,
+        folder: RecordingFolder?
     ) {
         do {
             let recordedAudio =
                 try recordingService.stopRecording()
 
+            isRecording = false
+            elapsedTime = 0
+            samples = []
+            detectedPitch = nil
+            processedPitch = nil
+            pitchHeightSamples = []
+            processedPitchSamples = []
+
             let record = RecordingRecord(
                 title: makeDefaultTitle(),
-                fileName:
-                    recordedAudio.fileURL.lastPathComponent,
-                duration:
-                    recordedAudio.duration
+                relativePath: try RecordingFileStore
+                    .relativePath(
+                        for: recordedAudio.fileURL
+                    ),
+                folderID: folder?.id,
+                duration: recordedAudio.duration
             )
 
             modelContext.insert(record)
 
             try modelContext.save()
-
-            isRecording = false
-            elapsedTime = 0
-            samples = []
+            savedRecord = record
         } catch {
             errorMessage =
                 error.localizedDescription
         }
+    }
+
+    func clearSavedRecord() {
+        savedRecord = nil
     }
 
     func cancelRecording() {
@@ -90,6 +117,10 @@ final class RecordingViewModel {
         isRecording = false
         elapsedTime = 0
         samples = []
+        detectedPitch = nil
+        processedPitch = nil
+        pitchHeightSamples = []
+        processedPitchSamples = []
     }
 
     private func observeRecordingState() {
@@ -100,6 +131,43 @@ final class RecordingViewModel {
 
                 samples =
                     recordingService.waveformSamples
+
+                detectedPitch =
+                    recordingService.detectedPitch
+                processedPitch =
+                    recordingService.processedPitch
+
+                if let detectedPitch {
+                    let exactMIDINote =
+                        CGFloat(detectedPitch.midiNote)
+                        + CGFloat(detectedPitch.cents / 100)
+
+                    pitchHeightSamples.append(
+                        exactMIDINote
+                    )
+
+                    if pitchHeightSamples.count > 100 {
+                        pitchHeightSamples.removeFirst(
+                            pitchHeightSamples.count - 100
+                        )
+                    }
+                }
+
+                if let processedPitch {
+                    let exactProcessedMIDINote =
+                        CGFloat(processedPitch.midiNote)
+                        + CGFloat(processedPitch.cents / 100)
+
+                    processedPitchSamples.append(
+                        exactProcessedMIDINote
+                    )
+
+                    if processedPitchSamples.count > 100 {
+                        processedPitchSamples.removeFirst(
+                            processedPitchSamples.count - 100
+                        )
+                    }
+                }
 
                 try? await Task.sleep(
                     for: .milliseconds(40)

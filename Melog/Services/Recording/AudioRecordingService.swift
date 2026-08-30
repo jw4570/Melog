@@ -14,12 +14,22 @@ import Observation
 final class AudioRecordingService {
     private var recorder: AVAudioRecorder?
     private var meterTimer: Timer?
+    private let pitchDetectionService =
+        PitchDetectionService()
 
     private(set) var isRecording = false
     private(set) var elapsedTime: TimeInterval = 0
 
     // 실시간 파형에 사용할 값
     private(set) var waveformSamples: [CGFloat] = []
+
+    var detectedPitch: DetectedPitch? {
+        pitchDetectionService.currentPitch
+    }
+
+    var processedPitch: DetectedPitch? {
+        pitchDetectionService.processedPitch
+    }
 
     private let maximumSampleCount = 80
 
@@ -31,7 +41,9 @@ final class AudioRecordingService {
         }
     }
 
-    func startRecording() async throws {
+    func startRecording(
+        in relativeDirectory: String? = nil
+    ) async throws {
         let permissionGranted =
             await requestPermission()
 
@@ -56,7 +68,9 @@ final class AudioRecordingService {
 
         let fileURL =
             try RecordingFileStore
-                .makeNewRecordingURL()
+                .makeNewRecordingURL(
+                    in: relativeDirectory
+                )
 
         let settings: [String: Any] = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
@@ -83,6 +97,7 @@ final class AudioRecordingService {
         }
 
         self.recorder = recorder
+        try? pitchDetectionService.start()
         isRecording = true
         elapsedTime = 0
         waveformSamples = []
@@ -100,6 +115,7 @@ final class AudioRecordingService {
         let duration = recorder.currentTime
 
         recorder.stop()
+        pitchDetectionService.stop()
         meterTimer?.invalidate()
         meterTimer = nil
 
@@ -107,7 +123,7 @@ final class AudioRecordingService {
         isRecording = false
         elapsedTime = 0
 
-        try AVAudioSession.sharedInstance().setActive(
+        try? AVAudioSession.sharedInstance().setActive(
             false,
             options: .notifyOthersOnDeactivation
         )
@@ -126,6 +142,7 @@ final class AudioRecordingService {
         let fileURL = recorder.url
 
         recorder.stop()
+        pitchDetectionService.stop()
         meterTimer?.invalidate()
         meterTimer = nil
 
